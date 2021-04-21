@@ -1,0 +1,32 @@
+<!-- Op dit moment zie je live het aantal milliseconden die vestrekten zijn sinds 1 januari 1970.
+Verander de code in regel 17 zodat de uren, minuten en seconden weergeven worden.
+Bijvoorbeeld: 11:45:21
+Op dit moment wordt enkel het aantal milliseconden die voorbij zijn gegaan sinds sinds 1 januari 1970 weergeven.
+Tip: gebruik de referentie van het JavaScript Date object om deze opdracht op te lossen
+https://www.w3schools.com/jsref/jsref_obj_date.asp
+Je hebt dit ook in de tutorials voorbij zien komen. -->
+<!DOCTYPE html>
+<html>
+	<head>
+	</head>
+	<body>
+		<p id="resultaat" style="font-size:40px;text-align:center;"></p>
+		<script>
+			function showTime() {
+				var date = new Date();
+				var ms1 = date.getTime();
+				var uur = Math.floor(ms1 / 3600000);
+				var ums = uur * 3600000;
+				var ms2 = ms1 - ums;
+				var min = Math.floor(ms2 / 60000);
+				var mms = min * 60000;
+				var ms3 = ms2 - mms;
+				var sec = Math.floor(ms3 / 1000);
+				var displayTime = `${uur}:${min}:${sec}` ;
+				document.getElementById("resultaat").innerHTML = displayTime;
+				window.requestAnimationFrame(showTime);
+			}
+			showTime();
+		</script>
+	</body>
+</html>

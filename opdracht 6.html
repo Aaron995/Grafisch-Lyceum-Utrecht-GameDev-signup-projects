@@ -1,0 +1,554 @@
+<!-- In deze game kun je de speler besturen met de A en D toetsen.
+De 'coins' die bovenaan het scherm verschijnen verdwijnen zodra ze de speler aanraken. Hierdoor scoort de speler punten, maar probleem is echter dat de cirkels zelf geen gedrag vertonen (ze bewegen niet).
+Zorg ervoor dat de cirkels in beweging komen richting de speler, je mag zelf de snelheid en eventueel het bewegingspatroon bedenken. De functie waarbinnen je de code moet plaatsen kun je vinden op regel 95.
+Je bent vrij om eventueel andere features toe te voegen die de game leuker maken.
+Maak er iets leuks van! -->
+<!DOCTYPE html>
+<html>
+	<head>
+	</head>
+	<body>
+		<canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;, background: src('img/Space.png')"></canvas>
+    <button id = "reset" onClick = "Herstart()"> Herstart </button>
+		<div id="score">Score: 0 </div>
+    <div id ="levens"> <p> Levens: </p>
+      <img src="Img/Spaceship.png" id="leven1">
+      <img src="Img/Spaceship.png" id="leven2">
+      <img src="Img/Spaceship.png" id="leven3">
+      <img src="Img/Spaceship.png" id="leven4">
+      <img src="Img/Spaceship.png" id="leven5">
+    </div>
+    <div id  ="uitleg">
+      <div id="AToets">
+      <img src="Img/Atoets.png" alt="Atoets">
+      <p> Gebruik A om naar link te gaan met het ruimteschip! </p>
+      </div>
+      <div id = "DToets">
+      <img src="Img/Dtoets.png" alt="DToets">
+      <p> Gebruik D om naar link te gaan met het ruimteschip! </p>
+      </div>
+      <div id = "Coin">
+      <img src="Img/Coin.png" alt="Coin">
+      <p> Verzamel 1 blauwe munt voor 1 punt! Als je een muntje mist, dan verlies je een leven! </p>
+      </div>
+      <div id = "CoinBig">
+      <img src="Img/CoinBig.png" alt="CoinBig">
+      <p> Verzamel 1 paarse munt voor 2 punten! Als je een muntje mist, dan verlies je een leven! </p>
+      </div>
+      <div id = "CoinSpeed">
+      <img src="Img/CoinSpeed.png" alt="CoinSpeed">
+      <p> Verzamel deze munt voor een speedboost! Als je deze munt mist, dan verlies je geen levens! </p>
+      </div>
+      </div>
+		<script>
+			var canvas = document.getElementById("myCanvas");
+			var context = canvas.getContext("2d");
+			var keyUp = false, keyDown = false, keyLeft = false, keyRight = false;
+			var ship;
+			var coins = [];
+			var bigCoins = [];
+			var speedCoins = [];
+			var counter = 0;
+			var bigCoinCounter = 750;
+      var bigCoinSpawn = 750;
+			var speedCoinCounter = 1500;
+			var spawnTime = 200;
+			var score = 0;
+			var bewegen = ['links', 'rechts','overslaan','overslaan'];
+			var beweegCounter = 100;
+			var bigBeweeg = ['rechts', 'links',];
+			var bigKeuze = BigKeuze();
+			var speedBoost = 0;
+			var gameTime = 0;
+			var coinSpeed = 0.5;
+      var coinBigSpeed = 0.8;
+      var gameTime = 0;
+      var levens = 5;
+      var interval = setInterval(plusGameTime, 1000);
+			hide();
+
+			function gameLoop() {
+        if (levens <= 0) {
+				         GameOver();
+			   }
+			  else {
+        if (gameTime == 40) {
+          spawnTime = 160;
+          coinSpeed = 0.8;
+      }
+        if (gameTime == 60) {
+          spawnTime = 120;
+          coinSpeed = 1;
+      }
+        if (gameTime == 80) {
+          spawnTime == 80;
+          coinSpeed = 1.2;
+          coinBigSpeed = 1;
+      }
+        if (gameTime == 120) {
+          spawnTime = 50;
+          coinSpeed = 1.4;
+          coinBigSpeed = 1.2;
+      }
+        if (gameTime == 140) {
+          spawnTime = 40;
+          coinSpeed = 1.5;
+          coinBigSpeed = 1.4;
+      }
+        if (gameTime == 160) {
+          spawnTime = 20;
+          coinSpeed = 1.6;
+          coinBigSpeed = 1.6;
+      }
+        if (gameTime == 200) {
+          spawnTime = 10;
+          coinSpeed = 1.8;
+          coinBigSpeed = 1.7;
+      }
+			   if (speedBoost > 0) {
+				  speedBoost--;
+			}
+
+			if (counter <= 0) {
+				coins.push(new Coin(Math.random() * canvas.width, 0));
+				counter = spawnTime;
+		} else {
+				counter--;
+		}
+
+				if (bigCoinCounter <= 0) {
+					var bigCoinRNG = Math.floor((Math.random() * 10) + 1)
+				} if (bigCoinRNG <= 5){
+					bigkeuze = BigKeuze();
+					bigCoins.push(new BigCoin(Math.random() * canvas.width, 0));
+					bigCoinCounter = bigCoinSpawn;
+				}
+
+				else {
+					bigCoinCounter--;
+				}
+
+				if (speedCoinCounter <= 0) {
+					var speedCoinRNG = Math.floor((Math.random() * 25) + 1)
+					if (speedCoinRNG <= 10); {
+						speedCoins.push(new SpeedCoin(Math.random() * canvas.width, 0));
+						speedCoinCounter = 2250;
+					}
+				} else {
+					speedCoinCounter--;
+				}
+
+				ship.update();
+				for (var i = 0; i < coins.length; i++) {
+					coins[i].update();
+					var x = coins[i].position.x - ship.position.x;
+					var y = coins[i].position.y - ship.position.y;
+					if (Math.sqrt(x * x + y * y) < 25) {
+						score++;
+						updateScore();
+						coins.splice(i, 1);
+						i--;
+						continue;
+					}
+					if (coins[i].position.y > canvas.height) {
+						coins.splice(i, 1);
+						levens--;
+						updateScore();
+						i--;
+						continue;
+					}
+				}
+				for (var a = 0; a < bigCoins.length; a++) {
+					bigCoins[a].update();
+					var x = bigCoins[a].position.x - ship.position.x;
+					var y = bigCoins[a].position.y - ship.position.y;
+					if (Math.sqrt(x * x + y * y) < 25) {
+						score = score + 2;
+						updateScore();
+						bigCoins.splice(a, 1);
+						a--;
+						continue;
+					}
+					if (bigCoins[a].position.y > canvas.height) {
+						bigCoins.splice(a, 1);
+						levens--;
+						updateScore();
+						a--;
+						continue;
+					}
+				}
+				for (var b = 0; b < speedCoins.length; b++) {
+					speedCoins[b].update();
+					var x = speedCoins[b].position.x - ship.position.x;
+					var y = speedCoins[b].position.y - ship.position.y;
+					if (Math.sqrt(x * x + y * y) < 25) {
+						speedBoost = 500	;
+						speedCoins.splice(b, 1);
+						b--;
+						continue;
+					}
+					if (speedCoins[b].position.y > canvas.height) {
+						speedCoins.splice(b, 1);
+						b--;
+						continue;
+					}
+				}
+
+						context.clearRect(0, 0, canvas.width, canvas.height);
+					for (var i = 0; i < coins.length; i++) {
+							coins[i].draw();
+					}
+					for (var a = 0; a < bigCoins.length; a++) {
+							bigCoins[a].draw();
+						}
+					for (var b = 0; b < speedCoins.length; b++) {
+								speedCoins[b].draw();
+							}
+            LevenCheck()
+            ship.draw();
+				window.requestAnimationFrame(gameLoop);
+				}
+			}
+
+
+			function Vector2(x, y) {
+				this.x = x;
+				this.y = y;
+			}
+
+			function PlayerShip(x, y, angle) {
+				this.position = new Vector2(x, y);
+				this.angle = angle;
+			}
+
+			PlayerShip.prototype.update = function() {
+				if (speedBoost > 0)
+				{
+					if (keyLeft) {
+						ship.position.x -= 16;
+					} else if (keyRight) {
+						ship.position.x += 16;
+					}
+				}
+				else if (speedBoost <= 0){
+				if (keyLeft) {
+					ship.position.x -= 8;
+				} else if (keyRight) {
+					ship.position.x += 8;
+				}
+			}
+			if (ship.position.x > 800) {
+				ship.position.x = 0
+				}
+			if (ship.position.x < -20) {
+				ship.position.x = 800
+			}
+		}
+
+			PlayerShip.prototype.draw = function() {
+				var shipImg = new Image;
+				shipImg.src = 'Img/Spaceship.png';
+				context.drawImage(shipImg, this.position.x, this.position.y);
+			}
+
+			function Coin(x, y) {
+				var kant;
+				var count;
+				this.position = new Vector2(x, y);
+				this.beweeg = new Beweeg(kant, count);
+			}
+
+			Coin.prototype.update = function() {
+				this.position.y +=coinSpeed;
+				for (var i = 0; i < coins.length; i++){
+				if (coins[i].beweeg.count <= 0) {
+					coins[i].beweeg.kant = KeuzeKant();
+				if (coins[i].beweeg.kant == 'rechts'){
+					coins[i].position.x += Math.random() + 7;
+				}
+				else if (coins[i].beweeg.kant == 'links') {
+					coins[i].position.x -= Math.random() + 7;
+				}
+				coins[i].beweeg.count = beweegCounter;
+			}
+			else {
+				coins[i].beweeg.count -= 1;
+			}
+
+			}
+				if (this.position.x < 1) {
+					this.position.x = 794;
+				}
+				if (this.position.x > 795) {
+					this.position.x = 2;
+				}
+			}
+
+			function KeuzeKant() {
+				return bewegen[(Math.random() * bewegen.length) | 0];
+			}
+
+			Coin.prototype.draw = function() {
+					var coinImg = new Image;
+					coinImg.src = 'Img/Coin.png';
+					context.drawImage(coinImg, this.position.x, this.position.y);
+			}
+			function BigCoin(x, y) {
+				this.position = new Vector2(x, y);
+			}
+
+			BigCoin.prototype.update = function() {
+				this.position.y += coinBigSpeed;
+				if (bigKeuze == 'links') {
+					this.position.x -= 2;
+				} else if (bigKeuze == 'rechts') {
+					this.position.x += 2;
+				}
+        if (this.position.x < 1) {
+					this.position.x = 794;
+				}
+				if (this.position.x > 795) {
+					this.position.x = 2;
+				}
+			}
+
+			BigCoin.prototype.draw = function() {
+					var bigCoinImg = new Image;
+					bigCoinImg.src = 'Img/CoinBig.png';
+					context.drawImage(bigCoinImg, this.position.x, this.position.y);
+			}
+			function SpeedCoin(x, y) {
+				this.position = new Vector2(x, y);
+			}
+
+			SpeedCoin.prototype.update = function() {
+				this.position.y +=4;
+        if (this.position.x < 1) {
+          this.position.x = 794;
+        }
+        if (this.position.x > 795) {
+          this.position.x = 2;
+        }
+			}
+
+			SpeedCoin.prototype.draw = function() {
+					var SpeedcoinImg = new Image;
+					SpeedcoinImg.src = 'Img/CoinSpeed.png';
+					context.drawImage(SpeedcoinImg, this.position.x, this.position.y);
+			}
+
+			function updateScore() {
+				document.getElementById("score").innerHTML = "Score: " + score;
+			}
+
+			function radianToVector2(radian) {
+				return new Vector2(Math.cos(radian), Math.sin(radian));
+			}
+
+			function degreeToVector2(degree) {
+				return radianToVector2(degree * Math.PI / 180);
+			}
+
+			function keyDownHandler(event) {
+				var keyPressed = String.fromCharCode(event.keyCode);
+				if (keyPressed == 'A') keyLeft = true;
+				if (keyPressed == 'D') keyRight = true;
+			}
+
+			function keyUpHandler(event) {
+				var keyPressed = String.fromCharCode(event.keyCode);
+				if (keyPressed == 'A') keyLeft = false;
+				if (keyPressed == 'D') keyRight = false;
+			}
+
+			function Beweeg(kant, count) {
+			 	this.count = beweegCounter;
+				this.kant = bewegen[(Math.random() * bewegen.length) | 0];
+				}
+
+			function CoinRandom(){
+				return coins[(Math.random() * coins.length) | 0];
+			}
+
+			function BigKeuze() {
+				bigKeuze = bigBeweeg[(Math.random() * bigBeweeg.length) | 0];
+				}
+
+      function plusGameTime() {
+        gameTime++;
+      }
+
+			function GameOver() {
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				context.font="200px Georgia";
+				context.fillText("Game", 150, 250);
+				context.fillText("Over!", 150, 425);
+				show();
+        clearInterval(interval);
+			}
+
+			function Herstart() {
+				ship;
+				coins = [];
+				bigCoins = [];
+				speedCoins = [];
+				counter = 0;
+        bigCoinCounter = 750;
+        bigCoinSpawn = 750;
+        speedCoinCounter = 1500;
+        spawnTime = 200;
+				score = 0;
+				bewegen = ['links', 'rechts','overslaan','overslaan',];
+				beweegCounter = 50;
+				bigBeweeg = ['rechts', 'links',];
+				bigKeuze = BigKeuze();
+				speedBoost = 0;
+        gameTime = 0;
+        coinSpeed = 0.5;
+        coinBigSpeed = 0.8;
+        gameTime = 0;
+        levens = 5;
+        interval = setInterval(plusGameTime, 1000);
+        LevenCheck();
+        hide();
+				updateScore();
+				gameLoop();
+			}
+
+      function LevenCheck(){
+        if (levens == 5){
+          document.getElementById("leven1").style.visibility = "visible"
+          document.getElementById("leven2").style.visibility = "visible"
+          document.getElementById("leven3").style.visibility = "visible"
+          document.getElementById("leven4").style.visibility = "visible"
+          document.getElementById("leven5").style.visibility = "visible"
+        }
+        if (levens == 4){
+          document.getElementById("leven1").style.visibility = "visible"
+          document.getElementById("leven2").style.visibility = "visible"
+          document.getElementById("leven3").style.visibility = "visible"
+          document.getElementById("leven4").style.visibility = "visible"
+          document.getElementById("leven5").style.visibility = "hidden"
+        }
+        if (levens == 3){
+          document.getElementById("leven1").style.visibility = "visible"
+          document.getElementById("leven2").style.visibility = "visible"
+          document.getElementById("leven3").style.visibility = "visible"
+          document.getElementById("leven4").style.visibility = "hidden"
+          document.getElementById("leven5").style.visibility = "hidden"
+        }
+        if (levens == 2){
+          document.getElementById("leven1").style.visibility = "visible"
+          document.getElementById("leven2").style.visibility = "visible"
+          document.getElementById("leven3").style.visibility = "hidden"
+          document.getElementById("leven4").style.visibility = "hidden"
+          document.getElementById("leven5").style.visibility = "hidden"
+        }
+        if (levens == 1){
+          document.getElementById("leven1").style.visibility = "visible"
+          document.getElementById("leven2").style.visibility = "hidden"
+          document.getElementById("leven3").style.visibility = "hidden"
+          document.getElementById("leven4").style.visibility = "hidden"
+          document.getElementById("leven5").style.visibility = "hidden"
+        }
+        if (levens == 0){
+          document.getElementById("leven1").style.visibility = "hidden"
+          document.getElementById("leven2").style.visibility = "hidden"
+          document.getElementById("leven3").style.visibility = "hidden"
+          document.getElementById("leven4").style.visibility = "hidden"
+          document.getElementById("leven5").style.visibility = "hidden"
+        }
+      }
+			function show(){
+			if(document.layers) document.layers['reset'].visibility="show";
+			if(document.getElementById) document.getElementById("reset").style.visibility="visible";
+			if(document.all) document.all.reset.style.visibility="visible";
+			}
+
+			function hide(){
+			if(document.layers) document.layers['reset'].visibility="hide";
+			if(document.getElementById) document.getElementById("reset").style.visibility="hidden";
+			if(document.all) document.all.reset.style.visibility="hidden";
+			}
+
+			document.addEventListener("keydown", keyDownHandler);
+			document.addEventListener("keyup", keyUpHandler);
+			ship = new PlayerShip(300, 550, 270);
+			gameLoop();
+		</script>
+		<style>
+      #score {
+        float:left;
+        font-size: 55px;
+        width: 280px;
+        padding-right: 0px;
+        margin-right: 0px;
+        margin-left: 0px;
+        margin-bottom: 0px;
+        margin-top: 0px;
+        position: absolute;
+        top: 601px;
+      }
+			button {
+				width:200px;
+				font-size:22px;
+				color:blue;
+				font-weight:bold;
+				padding:0;
+				margin-top:8px;
+				height:50px;
+        position: absolute;
+        top: 601px;
+        left: 300px;
+      }
+    #levens {
+      float:left;
+      padding-bottom: 0px;
+      padding-bottom: 0px;
+      position: absolute;
+      top: 651px;
+    }
+    #levens p{
+      font-size:55px;
+      margin-top: 0px;
+      margin-right: 0px;
+      float: left;
+      }
+    #levens img {
+      margin-top: 15px;
+      margin-left: 2px;
+      margin-right: 2px;
+      float: left;
+      }
+    #uitleg {
+      float:left;
+      position: absolute;
+      top: 711px;
+    }
+    #uitleg p {
+      font-size:30px;
+      margin-top: 0px;
+      margin-right: 0px;
+    }
+  #uitleg img {
+    margin-left: 10px;
+    margin-right: 7px;
+    float: left;
+    }
+  #AToets {
+    margin-right: 10px;
+    clear:left;
+    overflow: hidden;
+  }
+  #DToets {
+    margin-right: 10px;
+    clear:left;
+    overflow: hidden;
+  }
+  body {
+  background-color:  #4ddbff;
+  }
+   body { margin: 0; }
+		</style>
+	</body>
+</html>

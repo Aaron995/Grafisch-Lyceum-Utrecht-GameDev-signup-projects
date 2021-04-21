@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  	<head>
+	</head>
+  	<body>
+	<canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;"></canvas>
+	<script>
+		var canvas = document.getElementById("myCanvas");
+		var context = canvas.getContext("2d");
+		var keyUp = false, keyDown = false, keyLeft = false, keyRight = false;
+		var ship;
+
+		function gameLoop() {
+			if (keyLeft) {
+				ship.angle -= 4;
+			} else if (keyRight) {
+				ship.angle += 4;
+			}
+			if (keyUp) {
+				var offset = degreeToVector2(ship.angle);
+				ship.position.x += offset.x * 5;
+				ship.position.y += offset.y * 5;
+			}
+      if (ship.position.x > 800) {
+        ship.position.x = 0
+      }
+      if (ship.position.x < 0) {
+        ship.position.x = 800
+      }
+      if (ship.position.y > 600) {
+      ship.position.y = 0
+      }
+      if (ship.position.y < 0) {
+      ship.position.y = 600
+      }
+      context.clearRect(0, 0, canvas.width, canvas.height);
+			ship.draw();
+			window.requestAnimationFrame(gameLoop);
+		}
+
+		function Vector2(x, y) {
+			this.x = x;
+			this.y = y;
+		}
+
+		function PlayerShip(x, y, angle) {
+			this.position = new Vector2(x, y);
+			this.angle = angle;
+		}
+		PlayerShip.prototype.draw = function() {
+			context.save();
+			context.translate(this.position.x, this.position.y);
+			context.rotate(this.angle * Math.PI / 180);
+			context.beginPath();
+			context.moveTo(20, 0);
+			context.lineTo(-20, -20);
+			context.lineTo(-20, 20);
+			context.lineTo(20, 0);
+			context.closePath();
+			context.stroke();
+			context.restore();
+		}
+
+		function radianToVector2(radian) {
+			return new Vector2(Math.cos(radian), Math.sin(radian));
+		}
+
+		function degreeToVector2(degree) {
+			return radianToVector2(degree * Math.PI / 180);
+		}
+
+		function keyDownHandler(event) {
+			var keyPressed = String.fromCharCode(event.keyCode);
+			if (keyPressed == 'W') keyUp = true;
+			if (keyPressed == 'A') keyLeft = true;
+			if (keyPressed == 'D') keyRight = true;
+		}
+
+		function keyUpHandler(event) {
+			var keyPressed = String.fromCharCode(event.keyCode);
+			if (keyPressed == 'W') keyUp = false;
+			if (keyPressed == 'A') keyLeft = false;
+			if (keyPressed == 'D') keyRight = false;
+		}
+
+		document.addEventListener("keydown", keyDownHandler);
+		document.addEventListener("keyup", keyUpHandler);
+		ship = new PlayerShip(Math.random() * 600, Math.random() * 400, Math.random() * 360);
+		gameLoop();
+	</script>
+  </body>
+</html>
